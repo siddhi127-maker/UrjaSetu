@@ -211,6 +211,7 @@ async def run_scenario(request: ScenarioRequest, db: Session = Depends(get_db)):
         mod_solar, mod_wind, mod_demand,
         initial_soc=initial_soc,
         start_time=now,
+        diesel_available=not request.diesel_unavailable,
     )
 
     def summarize(decisions):

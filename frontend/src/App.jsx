@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
@@ -16,8 +16,8 @@ const pageConfig = {
 };
 
 function AppLayout() {
-  const path = window.location.pathname;
-  const config = pageConfig[path] || pageConfig['/'];
+  const location = useLocation();
+  const config = pageConfig[location.pathname] || pageConfig['/'];
 
   return (
     <div className="app-layout">

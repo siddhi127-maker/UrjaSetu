@@ -37,33 +37,42 @@ export default function EnergyMixChart({ solar = 0, wind = 0, battery = 0, diese
 
   return (
     <div>
-      <ResponsiveContainer width="100%" height={260}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={65}
-            outerRadius={100}
-            paddingAngle={3}
-            dataKey="value"
-            animationBegin={0}
-            animationDuration={800}
-          >
-            {data.map((entry, index) => (
-              <Cell key={index} fill={entry.color} stroke="none" />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-        </PieChart>
-      </ResponsiveContainer>
+      <div style={{ position: 'relative', width: '100%', height: 260 }}>
+        <ResponsiveContainer width="100%" height={260}>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={65}
+              outerRadius={100}
+              paddingAngle={3}
+              dataKey="value"
+              animationBegin={0}
+              animationDuration={800}
+            >
+              {data.map((entry, index) => (
+                <Cell key={index} fill={entry.color} stroke="none" />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
 
-      {/* Center label */}
-      <div style={{ textAlign: 'center', marginTop: -160, marginBottom: 100, pointerEvents: 'none' }}>
-        <div style={{ fontSize: 28, fontWeight: 800, color: '#f1f5f9' }}>
-          {total.toFixed(0)}
+        {/* Center label */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          pointerEvents: 'none',
+        }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: '#f1f5f9', lineHeight: 1.1 }}>
+            {total.toFixed(0)}
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b' }}>kWh Total</div>
         </div>
-        <div style={{ fontSize: 12, color: '#64748b' }}>kWh Total</div>
       </div>
 
       {/* Legend bar */}

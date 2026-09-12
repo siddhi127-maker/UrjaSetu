@@ -40,6 +40,7 @@ class LPOptimizer:
         initial_soc: float = None,
         use_milp: bool = False,
         start_time: datetime = None,
+        diesel_available: bool = True,
     ) -> List[DispatchDecision]:
         """
         Solve the multi-period dispatch optimization.
@@ -51,6 +52,7 @@ class LPOptimizer:
             initial_soc: Starting battery SoC (0–1)
             use_milp: If True, add diesel minimum runtime (binary variables)
             start_time: Timestamp of first period
+            diesel_available: Whether diesel generator is available
         """
         T = len(demand_forecast)
         if start_time is None:
@@ -64,11 +66,14 @@ class LPOptimizer:
         prob = pulp.LpProblem(f"UrjaSetu_Dispatch_{prob_type}", pulp.LpMinimize)
 
         # ── Decision variables ───────────────────────────────────
+        max_diesel = self.cfg.DIESEL_CAPACITY_KW if diesel_available else 0.0
+        max_batt_rate = self.cfg.BATTERY_CAPACITY_KWH * 0.5  # 0.5C max charge/discharge (100 kW)
+
         solar_used = [pulp.LpVariable(f"solar_{t}", 0, solar_forecast[t]) for t in range(T)]
         wind_used = [pulp.LpVariable(f"wind_{t}", 0, wind_forecast[t]) for t in range(T)]
-        battery_charge = [pulp.LpVariable(f"batt_ch_{t}", 0) for t in range(T)]
-        battery_discharge = [pulp.LpVariable(f"batt_dis_{t}", 0) for t in range(T)]
-        diesel = [pulp.LpVariable(f"diesel_{t}", 0, self.cfg.DIESEL_CAPACITY_KW) for t in range(T)]
+        battery_charge = [pulp.LpVariable(f"batt_ch_{t}", 0, max_batt_rate) for t in range(T)]
+        battery_discharge = [pulp.LpVariable(f"batt_dis_{t}", 0, max_batt_rate) for t in range(T)]
+        diesel = [pulp.LpVariable(f"diesel_{t}", 0, max_diesel) for t in range(T)]
         shortfall = [pulp.LpVariable(f"short_{t}", 0) for t in range(T)]
         soc = [pulp.LpVariable(f"soc_{t}", self.cfg.BATTERY_SOC_MIN, self.cfg.BATTERY_SOC_MAX) for t in range(T + 1)]
 
@@ -106,19 +111,23 @@ class LPOptimizer:
                 - (battery_discharge[t] / self.cfg.BATTERY_DISCHARGE_EFFICIENCY) / self.cfg.BATTERY_CAPACITY_KWH
             )
 
-            # Battery charge limited by excess renewable
-            excess = max(0, solar_forecast[t] + wind_forecast[t] - demand_forecast[t])
-            prob += battery_charge[t] <= excess + 0.01  # Small epsilon
+            # Renewable generation conservation: power to load + power to battery <= total renewables
+            prob += (
+                solar_used[t] + wind_used[t] + battery_charge[t]
+                <= solar_forecast[t] + wind_forecast[t]
+            )
 
             # MILP: diesel minimum runtime
             if use_milp:
-                # If diesel_on[t] = 0, diesel[t] must be 0
-                prob += diesel[t] <= self.cfg.DIESEL_CAPACITY_KW * diesel_on[t]
-                # Minimum runtime: if diesel starts, it must stay on for min_runtime hours
-                if t >= 1:
-                    # diesel_on[t] - diesel_on[t-1] captures start events
-                    for dt in range(1, min(self.cfg.DIESEL_MIN_RUNTIME_HOURS, T - t)):
-                        prob += diesel_on[t + dt] >= diesel_on[t] - diesel_on[t - 1]
+                if diesel_available:
+                    # If diesel_on[t] = 0, diesel[t] must be 0
+                    prob += diesel[t] <= self.cfg.DIESEL_CAPACITY_KW * diesel_on[t]
+                    # Minimum runtime: if diesel starts, it must stay on for min_runtime hours
+                    if t >= 1:
+                        for dt in range(1, min(self.cfg.DIESEL_MIN_RUNTIME_HOURS, T - t)):
+                            prob += diesel_on[t + dt] >= diesel_on[t] - diesel_on[t - 1]
+                else:
+                    prob += diesel[t] == 0
 
         # ── Solve ────────────────────────────────────────────────
         solver = pulp.PULP_CBC_CMD(msg=0, timeLimit=30)

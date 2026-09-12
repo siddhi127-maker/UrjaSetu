@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api", tags=["History"])
 
 @router.get("/history")
 async def get_history(
-    range: str = Query(default="week", regex="^(day|week|month)$"),
+    range: str = Query(default="week", pattern="^(day|week|month)$"),
     db: Session = Depends(get_db),
 ):
     """Get historical energy data with summary statistics."""
