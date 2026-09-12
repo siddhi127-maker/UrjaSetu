@@ -17,8 +17,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db, SessionLocal
 from app.models.db_models import EnergyRecord
+from app.models.user_models import User
 from app.member4_synthetic.data_generator import generate_synthetic_dataset
-from app.routers import forecast, optimize, battery, alerts, history
+from app.routers import forecast, optimize, battery, alerts, history, auth, admin
+from app.routers.auth import hash_password
 
 # Configure logging
 logging.basicConfig(
@@ -44,8 +46,8 @@ async def lifespan(app: FastAPI):
     try:
         count = db.query(EnergyRecord).count()
         if count == 0:
-            logger.info("📊 Seeding synthetic data (30 days × 24 hours)...")
-            data = generate_synthetic_dataset(days=30)
+            logger.info("📊 Seeding synthetic data (31 days × 24 hours)...")
+            data = generate_synthetic_dataset(days=31)
 
             for record in data:
                 db.add(EnergyRecord(**record))
@@ -54,6 +56,22 @@ async def lifespan(app: FastAPI):
             logger.info(f"✅ Seeded {len(data)} synthetic energy records")
         else:
             logger.info(f"📊 Database has {count} existing records")
+
+        # Seed default admin user if no users exist
+        user_count = db.query(User).count()
+        if user_count == 0:
+            admin_user = User(
+                username="admin",
+                email="admin@urjasetu.local",
+                full_name="System Admin",
+                hashed_password=hash_password("admin123"),
+                role="admin",
+            )
+            db.add(admin_user)
+            db.commit()
+            logger.info("✅ Default admin user created (admin / admin123)")
+        else:
+            logger.info(f"👤 {user_count} existing user(s)")
     finally:
         db.close()
 
@@ -91,6 +109,8 @@ app.add_middleware(
 
 # ── Register routers ────────────────────────────────────────────────────
 
+app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(forecast.router)
 app.include_router(optimize.router)
 app.include_router(battery.router)
@@ -108,6 +128,11 @@ async def root():
         "description": "Microgrid Energy Management System",
         "docs": "/docs",
         "endpoints": {
+            "auth_login": "/api/auth/login",
+            "auth_signup": "/api/auth/signup",
+            "auth_me": "/api/auth/me",
+            "admin_users": "/api/admin/users",
+            "dataset_info": "/api/dataset-info",
             "forecast": "/api/forecast",
             "weather": "/api/weather",
             "demand": "/api/demand",

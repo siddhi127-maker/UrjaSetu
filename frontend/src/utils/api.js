@@ -3,12 +3,19 @@
  * Centralized API calls to the FastAPI backend.
  */
 
+import { getToken } from './auth';
+
 const API_BASE = 'http://localhost:8000/api';
 
 async function fetchJSON(url, options = {}) {
   try {
+    const token = getToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch(`${API_BASE}${url}`, {
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       ...options,
     });
     if (!response.ok) {
@@ -97,3 +104,22 @@ export const runScenario = (params = {}) =>
 
 export const getHistory = (range = 'week') =>
   fetchJSON(`/history?range=${range}`);
+
+// ─── Admin ──────────────────────────────────────────────────────────────
+
+export const getAdminUsers = () =>
+  fetchJSON('/admin/users');
+
+export const updateUserRole = (userId, role) =>
+  fetchJSON(`/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: JSON.stringify({ role }),
+  });
+
+export const toggleUserActive = (userId) =>
+  fetchJSON(`/admin/users/${userId}`, { method: 'DELETE' });
+
+// ─── Dataset Info ───────────────────────────────────────────────────────
+
+export const getDatasetInfo = () =>
+  fetchJSON('/dataset-info');

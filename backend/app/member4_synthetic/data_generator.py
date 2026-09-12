@@ -21,10 +21,14 @@ class SyntheticDataGenerator:
         self.rng = np.random.default_rng(seed)
         self.cfg = settings
 
-    def generate(self, days: int = 30, start_date: datetime = None) -> List[Dict[str, Any]]:
-        """Generate `days` × 24 hourly records of synthetic microgrid data."""
+    def generate(self, days: int = 31, start_date: datetime = None) -> List[Dict[str, Any]]:
+        """Generate `days` × 24 hourly records of synthetic microgrid data.
+        
+        Default: 31 days from (now - 30 days) through end of today, ensuring
+        the dashboard and KPI pages always have data for the current day.
+        """
         if start_date is None:
-            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days)
+            start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days - 1)
 
         records = []
         battery_soc = self.cfg.BATTERY_INITIAL_SOC
@@ -315,7 +319,7 @@ class SyntheticDataGenerator:
         }
 
 
-def generate_synthetic_dataset(days: int = 30, seed: int = 42) -> List[Dict[str, Any]]:
+def generate_synthetic_dataset(days: int = 31, seed: int = 42) -> List[Dict[str, Any]]:
     """Convenience function to generate a synthetic dataset."""
     generator = SyntheticDataGenerator(seed=seed)
     return generator.generate(days=days)
