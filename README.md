@@ -87,7 +87,9 @@ subject to  solar + wind + battery_discharge + diesel  ≥  demand      (every t
 ## Screenshot
 
 <p align="center">
-  <img src="docs/images/dashboard-preview.svg" alt="UrjaSetu operator dashboard" width="85%">
+  <img width="1600" height="736" alt="dash" src="https://github.com/user-attachments/assets/f1726ccd-b1ba-462d-b0fc-e9d3f03326f6" />
+<img width="1600" height="738" alt="live" src="https://github.com/user-attachments/assets/abd8603e-00e3-4248-98ae-d57bcd5921ec" />
+" />
 </p>
 
 <p align="center"><em>Live cost, CO₂ avoided, and reliability metrics with a plain-language explanation panel.</em></p>
