@@ -1,20 +1,104 @@
+import { useState, useEffect } from 'react';
 import { useApi } from '../hooks/useApi';
-import { getKPIs, getDispatch, getBlackoutRisk } from '../utils/api';
+import { getKPIs, getDispatch, getBlackoutRisk, getSites } from '../utils/api';
 import KPICard from '../components/KPICard';
 import EnergyMixChart from '../components/EnergyMixChart';
 import BatteryGauge from '../components/BatteryGauge';
 import DispatchView from '../components/DispatchView';
 import BlackoutAlert from '../components/BlackoutAlert';
+import ExplainabilityCard from '../components/ExplainabilityCard';
+import { downloadCSV } from '../utils/csvExport';
 
 export default function Dashboard() {
   const { data: kpi, loading: kpiLoading } = useApi(getKPIs);
   const { data: dispatch } = useApi(getDispatch);
   const { data: risk } = useApi(getBlackoutRisk);
+  const { data: sites } = useApi(getSites);
+  const [activeSite, setActiveSite] = useState(null);
+
+  useEffect(() => {
+    if (sites && sites.length > 0 && !activeSite) {
+      setActiveSite(sites[0]);
+    }
+  }, [sites]);
+
+  const handleExportCSV = () => {
+    if (!dispatch) return;
+    const row = {
+      Timestamp: dispatch.timestamp,
+      Demand_kW: dispatch.demand_kw,
+      Solar_kW: dispatch.solar_kw,
+      Wind_kW: dispatch.wind_kw,
+      Battery_kW: dispatch.battery_kw,
+      Diesel_kW: dispatch.diesel_kw,
+      SoC_Before: dispatch.battery_soc_before,
+      SoC_After: dispatch.battery_soc_after,
+      Cost_INR: dispatch.total_cost,
+      Status: dispatch.status,
+      Explanation: dispatch.explanation,
+    };
+    downloadCSV(`UrjaSetu_Dispatch_${new Date().toISOString().slice(0, 10)}.csv`, [row]);
+  };
 
   return (
     <div className="animate-fade-in">
-      {/* Blackout Alert (if any) */}
+      {/* Site Header Banner */}
+      {activeSite && (
+        <div
+          className="glass-card"
+          style={{
+            marginBottom: 20,
+            padding: '14px 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 12,
+            background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(14,165,233,0.08) 100%)',
+            border: '1px solid rgba(16,185,129,0.2)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 28 }}>{activeSite.icon}</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-primary)' }}>
+                {activeSite.name} ({activeSite.location})
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                {activeSite.description}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: 'var(--text-secondary)',
+                background: 'var(--bg-glass)',
+                padding: '6px 12px',
+                borderRadius: 8,
+              }}
+            >
+              ☀️ {activeSite.solar_capacity_kw}kW | 🌬️ {activeSite.wind_capacity_kw}kW | 🔋 {activeSite.battery_capacity_kwh}kWh
+            </div>
+
+            <button className="btn btn-secondary" onClick={handleExportCSV} style={{ fontSize: 12, padding: '6px 12px' }}>
+              📥 Export CSV
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Blackout Alert */}
       <BlackoutAlert risk={risk} />
+
+      {/* 4-Block Decision Explainability */}
+      <ExplainabilityCard
+        blocks={dispatch?.explanation_blocks}
+        shortSummary={dispatch?.explanation}
+        status={dispatch?.status}
+      />
 
       {/* KPI Cards */}
       <div className="kpi-grid stagger">
@@ -83,11 +167,12 @@ export default function Dashboard() {
       <div className="glass-card" style={{ marginBottom: 24 }}>
         <div className="card-header">
           <div className="card-title">Current Dispatch</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             {dispatch?.optimizer_type === 'rule_based' ? '📐 Rule-Based' :
-             dispatch?.optimizer_type === 'lp' ? '📊 LP Optimized' : '📊 MILP Optimized'}
+             dispatch?.optimizer_type === 'lp' ? '📊 LP Optimized' : '⚡ PuLP MILP Optimal'}
           </div>
         </div>
+
         <DispatchView dispatch={dispatch} />
       </div>
 
@@ -125,3 +210,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

@@ -12,90 +12,69 @@ from app.config import settings
 class ExplainabilityEngine:
     """Template-based explanation generator for dispatch decisions."""
 
+    def generate_4block_explanation(self, decision: DispatchDecision, baseline_cost: float = None) -> dict:
+        """Generate structured 4-block decision insights for operators."""
+        total_renewable = decision.solar_kw + decision.wind_kw
+        demand = decision.demand_kw if decision.demand_kw > 0 else 1.0
+        ren_pct = min(100.0, (total_renewable / demand) * 100)
+
+        # Block 1: Summary
+        if decision.shortfall_kw > 0:
+            summary = f"🔴 Critical Supply Deficit: Unserved load of {decision.shortfall_kw:.1f} kW detected."
+        elif decision.diesel_kw > 0:
+            summary = f"⛽ Diesel Generator Active: Supplying {decision.diesel_kw:.1f} kW alongside renewables ({ren_pct:.0f}% clean power)."
+        elif decision.battery_kw > 0:
+            summary = f"🔋 Battery Discharging: Delivering {decision.battery_kw:.1f} kW to offset renewable generation gap."
+        elif decision.battery_kw < 0:
+            summary = f"☀️ Clean Power Surplus: Renewables meeting 100% of load with {abs(decision.battery_kw):.1f} kW stored in battery."
+        else:
+            summary = f"🌱 Optimal Clean Dispatch: Renewables perfectly balanced with demand ({ren_pct:.0f}% clean energy)."
+
+        # Block 2: Renewable & Battery Strategy
+        ren_str = f"Solar output is {decision.solar_kw:.1f} kW and wind output is {decision.wind_kw:.1f} kW ({ren_pct:.0f}% of demand). "
+        if decision.battery_kw < 0:
+            batt_str = f"Excess renewable power ({abs(decision.battery_kw):.1f} kW) is routed into battery storage, raising SoC from {decision.battery_soc_before*100:.0f}% to {decision.battery_soc_after*100:.0f}%."
+        elif decision.battery_kw > 0:
+            batt_str = f"Battery is discharging {decision.battery_kw:.1f} kW (SoC: {decision.battery_soc_before*100:.0f}% → {decision.battery_soc_after*100:.0f}%) to protect local energy reserves."
+        else:
+            batt_str = f"Battery SoC remains stable at {decision.battery_soc_after*100:.0f}%."
+        renewable_battery = ren_str + batt_str
+
+        # Block 3: Diesel & Load Shedding Rationale
+        if decision.diesel_kw > 0:
+            diesel_load = f"Diesel generator operating at {decision.diesel_kw:.1f} kW because renewable generation and battery availability fell short of peak demand by {decision.diesel_kw:.1f} kW (Fuel cost: ₹{decision.diesel_cost:.2f})."
+        elif decision.unserved_flexible_kw > 0:
+            diesel_load = f"Flexible load of {decision.unserved_flexible_kw:.1f} kW curtailed to preserve battery reserve while fully serving critical load ({decision.critical_load_kw:.1f} kW)."
+        elif decision.reserve_shortfall_kw > 0:
+            diesel_load = f"⚠️ Operating with a soft reserve shortfall of {decision.reserve_shortfall_kw:.1f} kW — monitor system headroom."
+        else:
+            diesel_load = "Zero diesel fuel burned; critical and flexible load tiers fully served with zero load shedding."
+
+        # Block 4: Impact & Actionable Recommendation
+        cost_savings_str = ""
+        if baseline_cost and baseline_cost > decision.total_cost:
+            saved = baseline_cost - decision.total_cost
+            cost_savings_str = f"MILP optimizer saved ₹{saved:.2f} vs reactive baseline in this period. "
+
+        if decision.battery_soc_after <= 0.25:
+            rec = "Recommendation: Battery SoC is low (≤25%). Prepare diesel generator or shed non-essential loads if demand spikes."
+        elif decision.diesel_kw > 0:
+            rec = "Recommendation: Generator is active. Consider shifting flexible irrigation/pumping load to daylight hours."
+        else:
+            rec = "Recommendation: Optimal system state. All systems operating within normal safety limits."
+        impact_recommendation = cost_savings_str + rec
+
+        return {
+            "summary": summary,
+            "renewable_battery": renewable_battery,
+            "diesel_load": diesel_load,
+            "impact_recommendation": impact_recommendation,
+        }
+
     def explain(self, decision: DispatchDecision) -> str:
         """Generate a human-readable explanation for a dispatch decision."""
-        parts = []
-
-        total_renewable = decision.solar_kw + decision.wind_kw
-        renewable_pct = (total_renewable / decision.demand_kw * 100) if decision.demand_kw > 0 else 0
-
-        # ── Solar status ────────────────────────────────────────
-        if decision.solar_kw > 0 and decision.solar_kw >= decision.demand_kw * 0.5:
-            parts.append(
-                f"Solar generation is strong at {decision.solar_kw:.1f} kW, "
-                f"providing {decision.solar_kw / decision.demand_kw * 100:.0f}% of demand."
-            )
-        elif decision.solar_kw > 0:
-            parts.append(
-                f"Solar is contributing {decision.solar_kw:.1f} kW "
-                f"({decision.solar_kw / decision.demand_kw * 100:.0f}% of demand)."
-            )
-
-        # ── Wind status ─────────────────────────────────────────
-        if decision.wind_kw > 0:
-            parts.append(
-                f"Wind turbines are generating {decision.wind_kw:.1f} kW."
-            )
-
-        # ── Renewable sufficiency ───────────────────────────────
-        if total_renewable >= decision.demand_kw and decision.diesel_kw == 0:
-            parts.append(
-                "Renewable sources are sufficient to meet current demand. "
-                "No diesel backup is needed."
-            )
-            if decision.battery_kw < 0:  # Charging
-                parts.append(
-                    f"Excess renewable energy ({abs(decision.battery_kw):.1f} kW) "
-                    f"is being stored in the battery."
-                )
-
-        # ── Battery discharging ─────────────────────────────────
-        if decision.battery_kw > 0:
-            parts.append(
-                f"Battery is supplying {decision.battery_kw:.1f} kW because "
-                f"renewable generation ({total_renewable:.1f} kW) is below "
-                f"current demand ({decision.demand_kw:.1f} kW)."
-            )
-
-        # ── Battery SoC warnings ────────────────────────────────
-        if decision.battery_soc_after <= 0.25:
-            soc_pct = decision.battery_soc_after * 100
-            parts.append(
-                f"⚠️ Battery SoC is at {soc_pct:.0f}% — approaching the "
-                f"20% safety threshold. Consider preparing diesel backup."
-            )
-
-        # ── Diesel activation ───────────────────────────────────
-        if decision.diesel_kw > 0:
-            available = total_renewable + max(0, decision.battery_kw)
-            parts.append(
-                f"Diesel generator was activated at {decision.diesel_kw:.1f} kW "
-                f"because available renewable + battery capacity ({available:.1f} kW) "
-                f"could not meet demand ({decision.demand_kw:.1f} kW)."
-            )
-
-        # ── Shortfall ───────────────────────────────────────────
-        if decision.shortfall_kw > 0:
-            parts.append(
-                f"🔴 SHORTFALL: {decision.shortfall_kw:.1f} kW of demand "
-                f"could not be met by any available source."
-            )
-
-        # ── Cost summary ────────────────────────────────────────
-        if decision.total_cost > 0:
-            parts.append(
-                f"This cycle costs ₹{decision.total_cost:.2f} "
-                f"(diesel: ₹{decision.diesel_cost:.2f}, "
-                f"battery wear: ₹{decision.battery_degradation_cost:.2f})."
-            )
-
-        # ── Status ──────────────────────────────────────────────
-        if decision.status == "critical":
-            parts.append("🔴 System status: CRITICAL — immediate action required.")
-        elif decision.status == "warning":
-            parts.append("🟡 System status: WARNING — monitor closely.")
-
-        return " ".join(parts) if parts else "System is operating normally."
+        blocks = self.generate_4block_explanation(decision)
+        return f"{blocks['summary']} {blocks['renewable_battery']} {blocks['diesel_load']}"
 
     def get_status(self, decision: DispatchDecision) -> str:
         """Determine operational status from a dispatch decision."""
@@ -124,3 +103,4 @@ class ExplainabilityEngine:
 
 # Module-level singleton
 explainability_engine = ExplainabilityEngine()
+

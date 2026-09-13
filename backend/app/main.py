@@ -16,10 +16,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db, SessionLocal
-from app.models.db_models import EnergyRecord
+from app.models.db_models import EnergyRecord, DispatchLog
 from app.models.user_models import User
+
 from app.member4_synthetic.data_generator import generate_synthetic_dataset
-from app.routers import forecast, optimize, battery, alerts, history, auth, admin
+from app.routers import forecast, optimize, battery, alerts, history, auth, admin, sites
 from app.routers.auth import hash_password
 
 # Configure logging
@@ -116,6 +117,7 @@ app.include_router(optimize.router)
 app.include_router(battery.router)
 app.include_router(alerts.router)
 app.include_router(history.router)
+app.include_router(sites.router)
 
 
 # ── Root endpoint ────────────────────────────────────────────────────────
@@ -132,6 +134,7 @@ async def root():
             "auth_signup": "/api/auth/signup",
             "auth_me": "/api/auth/me",
             "admin_users": "/api/admin/users",
+            "sites": "/api/sites",
             "dataset_info": "/api/dataset-info",
             "forecast": "/api/forecast",
             "weather": "/api/weather",
@@ -147,3 +150,4 @@ async def root():
             "scenario": "/api/scenario",
         },
     }
+

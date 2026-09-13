@@ -124,6 +124,14 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleAuthRequest(BaseModel):
+    email: str
+    full_name: str
+    google_id: str
+    password: str = None
+    avatar_url: str = None
+
+
 class AuthResponse(BaseModel):
     token: str
     user: dict
@@ -136,26 +144,91 @@ class UserProfile(BaseModel):
     full_name: str
     role: str
     is_active: bool
+    avatar_url: str = None
 
 
 # ── Endpoints ────────────────────────────────────────────────────────────
 
+@router.post("/google")
+async def google_auth(request: GoogleAuthRequest, db: Session = Depends(get_db)):
+    """Authenticate or register a user using Google Account credentials."""
+    identifier = request.email.strip().lower()
+    user = (
+        db.query(User)
+        .filter((User.google_id == request.google_id) | (User.email == identifier))
+        .first()
+    )
+
+    if user:
+        # If existing user has a password set and password was provided, verify it
+        if user.hashed_password and request.password:
+            if not verify_password(request.password, user.hashed_password):
+                raise HTTPException(status_code=401, detail="Incorrect password for this Google account.")
+
+        # Update google_id and avatar if missing
+        if not user.google_id:
+            user.google_id = request.google_id
+        if request.avatar_url:
+            user.avatar_url = request.avatar_url
+        db.commit()
+    else:
+        # Auto-provision new Google account user
+        base_username = identifier.split("@")[0]
+        username = base_username
+        counter = 1
+        while db.query(User).filter(User.username == username).first():
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        hashed_pwd = hash_password(request.password) if request.password else None
+
+        user = User(
+            username=username,
+            email=identifier,
+            full_name=request.full_name,
+            google_id=request.google_id,
+            avatar_url=request.avatar_url,
+            hashed_password=hashed_pwd,
+            role="operator",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is deactivated")
+
+    token = create_token(user.id, user.username, user.role)
+
+    return {
+        "token": token,
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role,
+            "avatar_url": user.avatar_url,
+        },
+    }
+
+
 @router.post("/signup")
 async def signup(request: SignupRequest, db: Session = Depends(get_db)):
     """Register a new user account."""
-    # Check for existing username
-    if db.query(User).filter(User.username == request.username).first():
-        raise HTTPException(status_code=400, detail="Username already taken")
+    clean_username = request.username.strip()
+    clean_email = request.email.strip().lower()
 
-    # Check for existing email
-    if db.query(User).filter(User.email == request.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
+    if db.query(User).filter(User.username == clean_username).first():
+        raise HTTPException(status_code=400, detail="Username already taken. Please choose another.")
 
-    # Create user
+    if db.query(User).filter(User.email == clean_email).first():
+        raise HTTPException(status_code=400, detail="Email already registered. Please sign in instead.")
+
     user = User(
-        username=request.username,
-        email=request.email,
-        full_name=request.full_name,
+        username=clean_username,
+        email=clean_email,
+        full_name=request.full_name.strip(),
         hashed_password=hash_password(request.password),
         role="operator",
     )
@@ -179,14 +252,28 @@ async def signup(request: SignupRequest, db: Session = Depends(get_db)):
 
 @router.post("/login")
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    """Authenticate a user and return a JWT token."""
-    user = db.query(User).filter(User.username == request.username).first()
+    """Authenticate a user using username or email and password."""
+    identifier = request.username.strip()
+    
+    # Query by username OR email (case-insensitive for email)
+    user = db.query(User).filter(
+        (User.username == identifier) | (User.email == identifier.lower())
+    ).first()
 
-    if not user or not verify_password(request.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username/email or password. Please try again.")
+
+    if not user.hashed_password:
+        raise HTTPException(
+            status_code=401,
+            detail="This account was created via Google Sign-In without a password. Please sign in using Google."
+        )
+
+    if not verify_password(request.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect password. Please check your password and try again.")
 
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="Account is deactivated")
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Please contact support.")
 
     token = create_token(user.id, user.username, user.role)
 
@@ -198,6 +285,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
             "email": user.email,
             "full_name": user.full_name,
             "role": user.role,
+            "avatar_url": user.avatar_url,
         },
     }
 
@@ -212,4 +300,6 @@ async def get_me(user: User = Depends(get_current_user)):
         "full_name": user.full_name,
         "role": user.role,
         "is_active": user.is_active,
+        "avatar_url": user.avatar_url,
     }
+

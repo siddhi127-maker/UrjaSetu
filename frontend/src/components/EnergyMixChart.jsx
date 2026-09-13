@@ -24,11 +24,11 @@ export default function EnergyMixChart({ solar = 0, wind = 0, battery = 0, diese
       const pct = ((item.value / total) * 100).toFixed(1);
       return (
         <div style={{
-          background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)',
+          background: 'var(--bg-secondary)', border: '1px solid var(--border-glass-hover)',
           borderRadius: 8, padding: '8px 14px', fontSize: 13,
         }}>
           <div style={{ color: item.payload.color, fontWeight: 600 }}>{item.name}</div>
-          <div style={{ color: '#e2e8f0' }}>{item.value.toFixed(1)} kWh ({pct}%)</div>
+          <div style={{ color: 'var(--text-primary)' }}>{item.value.toFixed(1)} kWh ({pct}%)</div>
         </div>
       );
     }
@@ -68,10 +68,10 @@ export default function EnergyMixChart({ solar = 0, wind = 0, battery = 0, diese
           textAlign: 'center',
           pointerEvents: 'none',
         }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: '#f1f5f9', lineHeight: 1.1 }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1 }}>
             {total.toFixed(0)}
           </div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>kWh Total</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>kWh Total</div>
         </div>
       </div>
 
@@ -91,10 +91,11 @@ export default function EnergyMixChart({ solar = 0, wind = 0, battery = 0, diese
             <div className={`legend-dot ${d.name.toLowerCase()}`} />
             <span>{d.name}</span>
             <span className="legend-value">{d.value.toFixed(1)} kWh</span>
-            <span style={{ color: '#64748b' }}>({((d.value / total) * 100).toFixed(0)}%)</span>
+            <span style={{ color: 'var(--text-muted)' }}>({((d.value / total) * 100).toFixed(0)}%)</span>
           </div>
         ))}
       </div>
     </div>
   );
 }
+

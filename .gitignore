@@ -1,7 +1,23 @@
-﻿.venv/
-.venv-1/
+﻿# Python
 __pycache__/
-*.pyc
-node_modules/
+*.py[cod]
+.venv/
+venv/
+.venv-1/
+backend/venv/
+
+# Environment variables
 .env
-*.db
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

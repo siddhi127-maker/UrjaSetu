@@ -11,6 +11,9 @@ from app.database import get_db
 from app.models.db_models import EnergyRecord, DispatchLog
 from app.config import settings
 
+from app.routers.auth import get_optional_user
+from app.models.user_models import User
+
 router = APIRouter(prefix="/api", tags=["History"])
 
 
@@ -18,8 +21,9 @@ router = APIRouter(prefix="/api", tags=["History"])
 async def get_history(
     range: str = Query(default="week", pattern="^(day|week|month)$"),
     db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
 ):
-    """Get historical energy data with summary statistics."""
+    """Get historical energy data with summary statistics for the user."""
     now = datetime.now()
     if range == "day":
         start = now - timedelta(days=1)
@@ -27,6 +31,58 @@ async def get_history(
         start = now - timedelta(weeks=1)
     else:
         start = now - timedelta(days=30)
+
+    # Check for user-scoped dispatch logs first
+    log_query = db.query(DispatchLog).filter(DispatchLog.timestamp >= start)
+    if user:
+        log_query = log_query.filter((DispatchLog.user_id == user.id) | (DispatchLog.user_id.is_(None)))
+    user_logs = log_query.order_by(DispatchLog.timestamp.asc()).all()
+
+    if user_logs:
+        record_list = [
+            {
+                "timestamp": l.timestamp.isoformat(),
+                "solar_generation": l.solar_dispatch,
+                "wind_generation": l.wind_dispatch,
+                "demand": l.demand,
+                "battery_soc": round(l.battery_soc_after * 100, 1),
+                "battery_charge": abs(min(0, l.battery_dispatch)),
+                "battery_discharge": max(0, l.battery_dispatch),
+                "diesel_generation": l.diesel_dispatch,
+                "fuel_consumed": round(l.diesel_dispatch * settings.DIESEL_FUEL_RATE, 2),
+                "total_cost": l.total_cost,
+                "co2_emissions": l.co2_emissions,
+            }
+            for l in user_logs
+        ]
+        total_solar = sum(l.solar_dispatch for l in user_logs)
+        total_wind = sum(l.wind_dispatch for l in user_logs)
+        total_diesel = sum(l.diesel_dispatch for l in user_logs)
+        total_demand = sum(l.demand for l in user_logs)
+        total_cost = sum(l.total_cost for l in user_logs)
+        total_co2 = sum(l.co2_emissions for l in user_logs)
+        total_fuel = sum(l.diesel_dispatch * settings.DIESEL_FUEL_RATE for l in user_logs)
+        baseline_cost = total_demand * settings.DIESEL_COST_PER_KWH
+        baseline_co2 = total_demand * settings.DIESEL_FUEL_RATE * settings.DIESEL_CO2_PER_LITER
+        hours_with_power = sum(1 for l in user_logs if l.shortfall == 0)
+
+        summary = {
+            "total_solar_kwh": round(total_solar, 2),
+            "total_wind_kwh": round(total_wind, 2),
+            "total_diesel_kwh": round(total_diesel, 2),
+            "total_demand_kwh": round(total_demand, 2),
+            "total_cost": round(total_cost, 2),
+            "baseline_cost": round(baseline_cost, 2),
+            "cost_saved": round(baseline_cost - total_cost, 2),
+            "total_co2_kg": round(total_co2, 2),
+            "co2_avoided_kg": round(baseline_co2 - total_co2, 2),
+            "total_fuel_liters": round(total_fuel, 2),
+            "renewable_percent": round((total_solar + total_wind) / max(1, total_demand) * 100, 1),
+            "hours_with_power": hours_with_power,
+            "total_hours": len(user_logs),
+            "reliability": round(hours_with_power / max(1, len(user_logs)) * 100, 1),
+        }
+        return {"records": record_list, "summary": summary, "range": range}
 
     records = (
         db.query(EnergyRecord)
@@ -55,7 +111,6 @@ async def get_history(
         for r in records
     ]
 
-    # Summary statistics
     total_solar = sum(r.solar_generation for r in records)
     total_wind = sum(r.wind_generation for r in records)
     total_diesel = sum(r.diesel_generation for r in records)
@@ -66,8 +121,7 @@ async def get_history(
 
     baseline_cost = total_demand * settings.DIESEL_COST_PER_KWH
     baseline_co2 = total_demand * settings.DIESEL_FUEL_RATE * settings.DIESEL_CO2_PER_LITER
-
-    hours_with_power = len(records)  # Synthetic data has no shortfalls
+    hours_with_power = len(records)
 
     summary = {
         "total_solar_kwh": round(total_solar, 2),
@@ -91,3 +145,4 @@ async def get_history(
         "summary": summary,
         "range": range,
     }
+

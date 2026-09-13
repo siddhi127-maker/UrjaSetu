@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, Float, String, DateTime, Boolean, Text
+from sqlalchemy import Column, Integer, Float, String, DateTime, Boolean, Text, ForeignKey
 from sqlalchemy.sql import func
 from app.database import Base
-
 
 class EnergyRecord(Base):
     """Hourly energy data — the core time-series table."""
@@ -45,10 +44,11 @@ class EnergyRecord(Base):
 
 
 class DispatchLog(Base):
-    """Optimizer decision log — records every dispatch decision."""
+    """Optimizer decision log — records every dispatch decision per user."""
     __tablename__ = "dispatch_logs"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     timestamp = Column(DateTime, nullable=False, index=True)
 
     # Dispatch decision

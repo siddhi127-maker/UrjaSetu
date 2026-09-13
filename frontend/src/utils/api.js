@@ -47,6 +47,14 @@ export const getBattery = () =>
 export const getBatteryHistory = (limit = 168) =>
   fetchJSON(`/battery/history?limit=${limit}`);
 
+// ─── Sites & Microgrid Profiles ─────────────────────────────────────────
+
+export const getSites = () =>
+  fetchJSON('/sites');
+
+export const getSiteDetails = (siteId) =>
+  fetchJSON(`/sites/${siteId}`);
+
 // ─── Dispatch & Optimization ────────────────────────────────────────────
 
 export const getDispatch = () =>
@@ -57,8 +65,9 @@ export const runOptimize = (params = {}) =>
     method: 'POST',
     body: JSON.stringify({
       hours_ahead: params.hours || 24,
-      optimizer_type: params.optimizer || 'rule_based',
+      optimizer_type: params.optimizer || 'milp',
       use_forecast: true,
+      site_id: params.siteId || 'rampur_village',
     }),
   });
 
@@ -91,12 +100,18 @@ export const runScenario = (params = {}) =>
   fetchJSON('/scenario', {
     method: 'POST',
     body: JSON.stringify({
+      site_id: params.siteId || 'rampur_village',
+      solar_multiplier: params.solarMultiplier ?? 1.0,
+      wind_multiplier: params.windMultiplier ?? 1.0,
+      battery_capacity_multiplier: params.batteryCapacityMultiplier ?? 1.0,
+      demand_multiplier: params.demandMultiplier ?? 1.0,
+      diesel_price_per_l: params.dieselPricePerL || null,
       cloudy_days: params.cloudyDays || 0,
       low_wind: params.lowWind || false,
       high_demand: params.highDemand || false,
       battery_degradation: params.batteryDegradation || 0,
       diesel_unavailable: params.dieselUnavailable || false,
-      hours: params.hours || 72,
+      hours: params.hours || 24,
     }),
   });
 
@@ -119,7 +134,22 @@ export const updateUserRole = (userId, role) =>
 export const toggleUserActive = (userId) =>
   fetchJSON(`/admin/users/${userId}`, { method: 'DELETE' });
 
+// ─── Auth ───────────────────────────────────────────────────────────────
+
+export { googleLogin } from './auth';
+
 // ─── Dataset Info ───────────────────────────────────────────────────────
 
 export const getDatasetInfo = () =>
   fetchJSON('/dataset-info');
+
+// ─── Modules 6.6 & 6.7 ─────────────────────────────────────────────────
+
+export const getDayAheadForecast = (batteryKwh = 160.0, socPct = 80.0) =>
+  fetchJSON(`/forecast/day-ahead?battery_kwh=${batteryKwh}&battery_soc_pct=${socPct}`);
+
+export const getPerUnitMaintenance = (irradiance = 850, temp = 32, wind = 8.5) =>
+  fetchJSON(`/maintenance/per-unit?irradiance=${irradiance}&temperature=${temp}&wind_speed=${wind}`);
+
+
+

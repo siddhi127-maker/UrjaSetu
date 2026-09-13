@@ -7,7 +7,7 @@
 
 /* ─── CSS Custom Properties ─────────────────────────────────────────────── */
 :root {
-  /* Base Colors */
+  /* Base Colors (Dark Mode Default) */
   --bg-primary: #0a0e17;
   --bg-secondary: #111827;
   --bg-card: rgba(17, 24, 39, 0.7);
@@ -15,6 +15,7 @@
   --bg-glass: rgba(255, 255, 255, 0.03);
   --border-glass: rgba(255, 255, 255, 0.08);
   --border-glass-hover: rgba(255, 255, 255, 0.15);
+  --header-bg: rgba(10, 14, 23, 0.85);
 
   /* Text */
   --text-primary: #f1f5f9;
@@ -69,6 +70,28 @@
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+/* ─── Light Mode Overrides ─────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-glass: rgba(15, 23, 42, 0.04);
+  --border-glass: rgba(15, 23, 42, 0.1);
+  --border-glass-hover: rgba(15, 23, 42, 0.2);
+  --header-bg: rgba(255, 255, 255, 0.9);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-accent: #1e293b;
+
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 8px 32px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.1);
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────────────────── */
@@ -1237,27 +1260,53 @@ body::before {
 
 .auth-error {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-left: 4px solid #ef4444;
   border-radius: 10px;
-  color: #fca5a5;
-  font-size: 13px;
-  margin-bottom: 16px;
-  animation: auth-shake 0.4s ease;
+  color: #f87171;
+  font-size: 13.5px;
+  line-height: 1.4;
+  margin-bottom: 20px;
+  animation: auth-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+[data-theme='light'] .auth-error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  border-left-color: #dc2626;
+  color: #991b1b;
 }
 
 .auth-error-icon {
-  font-size: 16px;
+  font-size: 18px;
   flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.auth-error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.auth-error-content strong {
+  font-weight: 600;
+  font-size: 13px;
+  color: #ef4444;
+}
+
+[data-theme='light'] .auth-error-content strong {
+  color: #991b1b;
 }
 
 @keyframes auth-shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
 }
 
 .auth-field {
@@ -1377,6 +1426,376 @@ body::before {
 .auth-demo-hint span {
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+/* ─── Google Auth Styles ─────────────────────────────────────────── */
+
+.auth-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-glass-hover);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.auth-google-btn:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  border-color: rgba(66, 133, 244, 0.5);
+  box-shadow: 0 4px 14px rgba(66, 133, 244, 0.15);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0 14px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.auth-divider span {
+  padding: 0 10px;
+}
+
+.google-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* ── Google OAuth-style Modal ──────────────────────────────── */
+
+.google-oauth-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 40px 40px 20px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15), 0 10px 40px rgba(0,0,0,0.1);
+  position: relative;
+  font-family: 'Google Sans', 'Roboto', 'Inter', system-ui, sans-serif;
+  animation: googleModalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes googleModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.google-oauth-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #5f6368;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.google-oauth-close:hover {
+  background: #f1f3f4;
+}
+
+.google-oauth-logo {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.google-oauth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.google-oauth-title {
+  font-size: 24px;
+  font-weight: 400;
+  color: #202124;
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+.google-oauth-subtitle {
+  font-size: 16px;
+  color: #5f6368;
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+/* Floating label input field (Google style) */
+.google-oauth-field {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.google-oauth-field input {
+  width: 100%;
+  padding: 16px 14px 6px;
+  font-size: 16px;
+  color: #202124;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.google-oauth-field input:focus {
+  border-color: #1a73e8;
+  border-width: 2px;
+  padding: 15px 13px 5px;
+}
+
+.google-oauth-field label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #5f6368;
+  pointer-events: none;
+  transition: all 0.15s ease;
+  background: #fff;
+  padding: 0 4px;
+}
+
+.google-oauth-field input:focus + label,
+.google-oauth-field input:not(:placeholder-shown) + label {
+  top: 0;
+  font-size: 12px;
+  color: #1a73e8;
+}
+
+.google-oauth-field input:not(:focus):not(:placeholder-shown) + label {
+  color: #5f6368;
+}
+
+/* Error message */
+.google-oauth-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d93025;
+  font-size: 13px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #fce8e6;
+  border-radius: 6px;
+}
+
+/* Help text */
+.google-oauth-help {
+  font-size: 13px;
+  color: #5f6368;
+  margin: 4px 0 24px;
+  line-height: 1.5;
+}
+
+/* Consent text */
+.google-oauth-consent {
+  font-size: 12px;
+  color: #5f6368;
+  margin: 4px 0 24px;
+  line-height: 1.5;
+}
+
+.google-oauth-consent-link {
+  color: #1a73e8;
+  cursor: pointer;
+}
+
+.google-oauth-consent-link:hover {
+  text-decoration: underline;
+}
+
+/* Profile section */
+.google-oauth-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 8px 0 20px;
+  padding: 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e8eaed;
+}
+
+.google-oauth-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.google-oauth-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.google-oauth-profile-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.google-oauth-profile-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #202124;
+}
+
+.google-oauth-profile-email {
+  font-size: 13px;
+  color: #5f6368;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action buttons */
+.google-oauth-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 16px;
+}
+
+.google-oauth-link {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.google-oauth-link:hover {
+  background: #e8f0fe;
+}
+
+.google-oauth-back {
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.google-oauth-back:hover {
+  background: #e8f0fe;
+}
+
+.google-oauth-next {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  min-width: 80px;
+}
+
+.google-oauth-next:hover {
+  background: #1765cc;
+  box-shadow: 0 1px 3px rgba(26,115,232,0.3);
+}
+
+.google-oauth-next:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* Footer */
+.google-oauth-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid #e8eaed;
+}
+
+.google-oauth-footer > span {
+  font-size: 12px;
+  color: #5f6368;
+}
+
+.google-oauth-footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.google-oauth-footer-links span {
+  font-size: 12px;
+  color: #5f6368;
+  cursor: pointer;
+}
+
+.google-oauth-footer-links span:hover {
+  color: #202124;
+}
+
+/* ── Dark mode override for Google OAuth modal ─────────────── */
+[data-theme="light"] .google-oauth-modal {
+  background: #fff;
+}
+
+/* The Google OAuth modal deliberately stays white-on-white to match
+   the real Google sign-in popup aesthetic, even in dark mode.
+   Only minor adjustments for readability when embedded in a dark page: */
+@media (prefers-color-scheme: dark) {
+  .google-oauth-modal {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 10px 40px rgba(0,0,0,0.25);
+  }
 }
 
 

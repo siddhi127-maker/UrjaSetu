@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Admin from './pages/Admin';
 import { isLoggedIn, getStoredUser, isAdmin, logout } from './utils/auth';
+import { ThemeProvider } from './context/ThemeContext';
 
 const pageConfig = {
   '/': { title: 'Dashboard', subtitle: 'Village Microgrid Overview' },
@@ -93,23 +94,26 @@ export default function App() {
   if (!ready) return null;
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public auth routes */}
-        <Route path="/login" element={
-          isLoggedIn() ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />
-        } />
-        <Route path="/signup" element={
-          isLoggedIn() ? <Navigate to="/" replace /> : <Signup onLogin={handleLogin} />
-        } />
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public auth routes */}
+          <Route path="/login" element={
+            isLoggedIn() ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />
+          } />
+          <Route path="/signup" element={
+            isLoggedIn() ? <Navigate to="/" replace /> : <Signup onLogin={handleLogin} />
+          } />
 
-        {/* Protected app routes */}
-        <Route path="/*" element={
-          <ProtectedRoute>
-            <AppLayout user={user} onLogout={handleLogout} />
-          </ProtectedRoute>
-        } />
-      </Routes>
-    </BrowserRouter>
+          {/* Protected app routes */}
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <AppLayout user={user} onLogout={handleLogout} />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
+

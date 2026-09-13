@@ -31,7 +31,7 @@ export default function BlackoutAlert({ risk }) {
         </span>
       </div>
 
-      <div style={{ fontSize: 14, lineHeight: 1.6, color: '#e2e8f0', marginBottom: 12 }}>
+      <div style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-primary)', marginBottom: 12 }}>
         {risk.message}
       </div>
 
@@ -43,11 +43,11 @@ export default function BlackoutAlert({ risk }) {
 
       {risk.recommendations && risk.recommendations.length > 0 && (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 6 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
             RECOMMENDATIONS
           </div>
           {risk.recommendations.map((rec, i) => (
-            <div key={i} style={{ fontSize: 13, color: '#cbd5e1', padding: '3px 0' }}>
+            <div key={i} style={{ fontSize: 13, color: 'var(--text-secondary)', padding: '3px 0' }}>
               → {rec}
             </div>
           ))}
@@ -56,3 +56,4 @@ export default function BlackoutAlert({ risk }) {
     </div>
   );
 }
+

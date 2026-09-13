@@ -34,7 +34,7 @@ export default function BatteryGauge({ soc = 80, health = 100 }) {
       </div>
 
       <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <div style={{ fontSize: 13, color: '#94a3b8' }}>Battery Health</div>
+        <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Battery Health</div>
         <div style={{
           fontSize: 18, fontWeight: 700,
           color: health >= 80 ? '#10b981' : health >= 60 ? '#f59e0b' : '#ef4444'
@@ -42,6 +42,7 @@ export default function BatteryGauge({ soc = 80, health = 100 }) {
           {health.toFixed(0)}%
         </div>
       </div>
+
     </div>
   );
 }

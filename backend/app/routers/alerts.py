@@ -102,6 +102,9 @@ async def explain_dispatch(dispatch_id: int, db: Session = Depends(get_db)):
     }
 
 
+from app.member4_explain.per_unit_maintenance import per_unit_maintenance
+
+
 @router.get("/performance")
 async def get_performance(db: Session = Depends(get_db)):
     """Get equipment performance ratios."""
@@ -172,3 +175,29 @@ async def get_performance(db: Session = Depends(get_db)):
         "solar": solar_perf,
         "wind": wind_perf,
     }
+
+
+@router.get("/maintenance/per-unit")
+async def get_per_unit_maintenance(
+    db: Session = Depends(get_db),
+    irradiance: float = Query(default=850.0, ge=0.0),
+    temperature: float = Query(default=32.0),
+    wind_speed: float = Query(default=8.5, ge=0.0),
+):
+    """
+    Module 6.7: AI-Based Per-Unit Predictive Maintenance & Servicing Alerts.
+    Evaluates string/unit expected vs actual outputs, performance gaps, peer averages,
+    3-observation persistence rules, priority scores, and maintenance statuses.
+    """
+    results = per_unit_maintenance.evaluate_site_components(
+        db,
+        irradiance=irradiance,
+        temperature=temperature,
+        wind_speed=wind_speed,
+    )
+    return {
+        "components": results,
+        "total_components": len(results),
+        "alerts_count": sum(1 for c in results if c["persistent_anomaly"]),
+    }
+

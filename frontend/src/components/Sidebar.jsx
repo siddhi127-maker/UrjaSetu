@@ -48,7 +48,11 @@ export default function Sidebar({ user, onLogout }) {
         {user && (
           <div className="sidebar-user">
             <div className="sidebar-avatar">
-              {user.full_name?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || '?'}
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                user.full_name?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || '?'
+              )}
             </div>
             <div className="sidebar-user-info">
               <span className="sidebar-username">{user.full_name || user.username}</span>
@@ -59,6 +63,7 @@ export default function Sidebar({ user, onLogout }) {
             </button>
           </div>
         )}
+
         <div className="sidebar-status">
           <div className="status-dot" />
           <span>System Online</span>

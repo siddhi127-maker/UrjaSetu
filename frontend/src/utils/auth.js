@@ -107,3 +107,31 @@ export async function getMe() {
   setStoredUser(user);
   return user;
 }
+
+export async function googleLogin({ email, fullName, avatarUrl, googleId, password, idToken } = {}) {
+  if (!email) throw new Error('Email is required for Google sign-in.');
+
+  const response = await fetch(`${API_BASE}/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email,
+      full_name: fullName || email.split('@')[0],
+      avatar_url: avatarUrl || '',
+      google_id: googleId || `google_${btoa(email)}_${Date.now()}`,
+      password: password || undefined,
+      id_token: idToken || 'google_token_simulated',
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || 'Google sign-in failed');
+  }
+
+  const data = await response.json();
+  setToken(data.token);
+  setStoredUser(data.user);
+  return data;
+}
+
