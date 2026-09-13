@@ -15,7 +15,7 @@ Millions of people in rural Indian villages depend on microgrids — small, loca
 
 UrjaSetu is the operator's co-pilot. It forecasts solar, wind, and demand for the hours ahead, runs an optimizer to decide the cheapest, greenest dispatch plan, tracks battery health in real time, predicts blackouts before they happen — and explains why it made every decision, in plain language, on a single dashboard.
 
-Built for a hackathon. Built to actually work.
+Built for a hackathon. Built to actually work..
 
 Highlights
 🔮 Forecasting — solar & wind generation and demand, powered by live weather data (with a synthetic fallback so it never breaks)
@@ -29,7 +29,7 @@ Highlights
 🖼️ Prototype
 <div align="center"> <img src="docs/images/dashboard-preview.svg" alt="UrjaSetu dashboard prototype — dark glassmorphism UI showing KPI cards, energy mix donut chart, battery gauge, hourly dispatch bars, and an AI explainability panel" width="100%">
 
-Live operator dashboard — KPIs, energy mix, battery gauge, hourly dispatch, and AI-generated explanations, all on one screen.
+Live operator dashboard — KPIs, energy mix, battery gauge, hourly dispatch, and AI-generated explanations, all on one screen..
 
 </div>
 
