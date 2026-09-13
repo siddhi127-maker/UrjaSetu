@@ -88,8 +88,13 @@ subject to  solar + wind + battery_discharge + diesel  ≥  demand      (every t
 
 <p align="center">
   <img width="1600" height="736" alt="dash" src="https://github.com/user-attachments/assets/f1726ccd-b1ba-462d-b0fc-e9d3f03326f6" />
-<img width="1600" height="738" alt="live" src="https://github.com/user-attachments/assets/abd8603e-00e3-4248-98ae-d57bcd5921ec" />
-" />
+  <img width="1600" height="738" alt="live" src="https://github.com/user-attachments/assets/abd8603e-00e3-4248-98ae-d57bcd5921ec" />
+   <img width="1600" height="729" alt="blackout" src="https://github.com/user-attachments/assets/a4742d80-9838-4228-9d25-35b3a5c3d4be" />
+   <img width="1600" height="668" alt="whatif" src="https://github.com/user-attachments/assets/657ed016-e690-47ae-adf1-128e68c33cbe" />
+   <img width="1600" height="712" alt="optimizer" src="https://github.com/user-attachments/assets/6af2aa49-0212-4e2c-b485-7c2c643aefa6" />
+
+
+
 </p>
 
 <p align="center"><em>Live cost, CO₂ avoided, and reliability metrics with a plain-language explanation panel.</em></p>
