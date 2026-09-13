@@ -36,7 +36,7 @@ Live operator dashboard — KPIs, energy mix, battery gauge, hourly dispatch, an
 The dashboard runs as a dark, glassmorphic React app (see frontend/src/index.css for the full design system) — the preview above is rendered from that same palette. Spin it up yourself with the Quick Start below to see it live with real data.
 
 🏗️ Architecture
-                     ┌────────────────────┐
+                     ┌──────────────────  ──┐  
   Weather APIs  ───▶ │   Forecasting (M3)  │
   (OpenWeatherMap)   │  solar·wind·demand   │
                      └──────────┬───────────┘
