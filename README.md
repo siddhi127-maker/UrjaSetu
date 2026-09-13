@@ -178,7 +178,6 @@ Full interactive documentation is generated automatically at \`/docs\` once the 
 
 ## Project Structure
 
-\`\`\`text
 UrjaSetu/
 ├── backend/
 │   ├── requirements.txt
@@ -196,7 +195,6 @@ UrjaSetu/
         ├── pages/                # Dashboard, Dispatch, Forecast, Scenarios, History, Admin
         ├── components/           # KPI cards, charts, gauges, alerts
         └── utils/, hooks/        # API client, auth, data hooks
-\`\`\`
 
 ## Roadmap
 
