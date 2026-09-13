@@ -1,7 +1,6 @@
 <div align="center">
+<img width="1600" height="712" alt="WhatsApp Image 2026-09-13 at 9 17 58 AM" src="https://github.com/user-attachments/assets/cbe3f0b4-c59b-4b54-ac3f-b6169a6178e4" />
 
-<img src="<img width="1600" height="712" alt="WhatsApp Image 2026-09-13 at 9 17 58 AM" src="https://github.com/user-attachments/assets/cbe3f0b4-c59b-4b54-ac3f-b6169a6178e4" />
-" alt="UrjaSetu" width="100%">
 
 # UrjaSetu
 
