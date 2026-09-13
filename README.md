@@ -50,39 +50,45 @@ Most sites today run on a **fixed schedule** (e.g. diesel from 6–9 PM) or an *
 
 ## Architecture
 
-\`\`\`mermaid
-flowchart LR
-    W[Weather API] --> F[Forecasting Engine]
-    D[Demand History] --> F
-    F --> O[Optimization Engine]
-    B[(Battery State)] --> O
-    O --> DP[Dispatch: Solar / Wind / Battery / Diesel]
-    DP --> V[Reliability & Blackout Check]
-    V --> E[Explainability Layer]
-    E --> DASH[Dashboard]
-    E --> SMS[SMS Alert]
-    DASH --> LOG[(History Log)]
-    LOG -.next cycle.-> F
-\`\`\`
+
+```text
+  Weather API  ─┐
+                 ├──▶  Forecasting Engine  ──▶  Optimization Engine  ◀── Battery State
+  Demand History ┘                                     │
+                                                         ▼
+                                    Dispatch: Solar / Wind / Battery / Diesel
+                                                         │
+                                                         ▼
+                                       Reliability & Blackout Check
+                                                         │
+                                                         ▼
+                                          Explainability Layer
+                                                    │         │
+                                                    ▼         ▼
+                                              Dashboard    SMS Alert
+                                                    │
+                                                    ▼
+                                             History Log ──▶ (fed into next cycle's forecast)
+```
 
 The dispatch cycle re-runs every 15–60 minutes:
 
-\`\`\`mermaid
-flowchart LR
-    A[Sense] --> B[Forecast] --> C[Optimize] --> D[Dispatch] --> E[Validate] --> F[Display]
-    F -.loop.-> A
-\`\`\`
+```text
+Sense ──▶ Forecast ──▶ Optimize ──▶ Dispatch ──▶ Validate ──▶ Display ──┐
+  ▲                                                                     │
+  └─────────────────────────────  loop  ──────────────────────────────┘
+```
 
 ### Optimization model
 
-\`\`\`text
+```text
 minimize    diesel_cost + emissions_penalty + battery_degradation_cost
 
 subject to  solar + wind + battery_discharge + diesel  ≥  demand      (every timestep)
             battery_SoC                                 ≥  safety_floor (~20%)
             diesel_runtime                               ≥  min_runtime
             remaining_fuel                                ≥  0
-\`\`\`
+```
 
 ## Screenshot
 
@@ -178,6 +184,8 @@ Full interactive documentation is generated automatically at \`/docs\` once the 
 
 ## Project Structure
 
+
+```text
 UrjaSetu/
 ├── backend/
 │   ├── requirements.txt
@@ -195,6 +203,7 @@ UrjaSetu/
         ├── pages/                # Dashboard, Dispatch, Forecast, Scenarios, History, Admin
         ├── components/           # KPI cards, charts, gauges, alerts
         └── utils/, hooks/        # API client, auth, data hooks
+```
 
 ## Roadmap
 
