@@ -17,6 +17,7 @@ const pageConfig = {
   '/': { title: 'Dashboard', subtitle: 'Village Microgrid Overview' },
   '/dispatch': { title: 'Live Dispatch', subtitle: 'Real-time optimization controls' },
   '/forecast': { title: 'Energy Forecast', subtitle: 'Solar, wind & demand predictions' },
+  '/maintenance': { title: 'Predictive Maintenance', subtitle: 'AI Per-Unit Servicing & Anomaly Alerts' },
   '/scenarios': { title: 'What-If Simulator', subtitle: 'Explore scenario impacts' },
   '/history': { title: 'History', subtitle: 'Historical performance review' },
   '/admin': { title: 'Admin Panel', subtitle: 'User management & access control' },
@@ -53,6 +54,8 @@ function AppLayout({ user, onLogout }) {
             <Route path="/" element={<Dashboard />} />
             <Route path="/dispatch" element={<Dispatch />} />
             <Route path="/forecast" element={<Forecast />} />
+            <Route path="/maintenance" element={<Forecast />} />
+            <Route path="/configuration" element={<Forecast />} />
             <Route path="/scenarios" element={<Scenarios />} />
             <Route path="/history" element={<History />} />
             <Route

@@ -1,13 +1,16 @@
-﻿# Python
-__pycache__/
-*.py[cod]
-.venv/
+﻿# Python virtual environments
 venv/
+.venv/
 .venv-1/
 backend/venv/
 
 # Environment variables
 .env
+backend/.env
+
+# Python cache
+__pycache__/
+*.py[cod]
 
 # Node
 node_modules/
@@ -21,3 +24,8 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3

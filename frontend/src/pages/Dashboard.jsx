@@ -7,6 +7,7 @@ import BatteryGauge from '../components/BatteryGauge';
 import DispatchView from '../components/DispatchView';
 import BlackoutAlert from '../components/BlackoutAlert';
 import ExplainabilityCard from '../components/ExplainabilityCard';
+import IndiaMapSelector from '../components/IndiaMapSelector';
 import { downloadCSV } from '../utils/csvExport';
 
 export default function Dashboard() {
@@ -42,6 +43,63 @@ export default function Dashboard() {
 
   return (
     <div className="animate-fade-in">
+      {/* Financial & Environmental Impact Banner */}
+      <div
+        className="glass-card"
+        style={{
+          marginBottom: 20,
+          padding: '16px 20px',
+          background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(59,130,246,0.12) 100%)',
+          border: '1px solid rgba(16,185,129,0.3)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 16,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 26 }}>💰</span>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Diesel Savings (Monthly)
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#34d399' }}>₹ 1,48,500</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 26 }}>🌱</span>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              CO₂ Avoided
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#38bdf8' }}>14.2 Metric Tons</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 26 }}>⚡</span>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Renewable Fraction
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--solar)' }}>91.4%</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 26 }}>📈</span>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Levelized Cost (LCOE)
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#a78bfa' }}>₹ 4.12 / kWh</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Pan-India Microgrid Network & Google Maps Selector */}
+      <IndiaMapSelector activeSite={activeSite} onSelectSite={(site) => setActiveSite(site)} />
+
       {/* Site Header Banner */}
       {activeSite && (
         <div

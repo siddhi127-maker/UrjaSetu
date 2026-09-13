@@ -3,19 +3,23 @@ import { NavLink } from 'react-router-dom';
 const navItems = [
   { path: '/', icon: '📊', label: 'Dashboard' },
   { path: '/dispatch', icon: '⚡', label: 'Live Dispatch' },
-  { path: '/forecast', icon: '🌤️', label: 'Forecast' },
-  { path: '/scenarios', icon: '🔬', label: 'What-If' },
-  { path: '/history', icon: '📈', label: 'History' },
+  { path: '/forecast', icon: '🌤️', label: 'Forecast & Demand' },
+  { path: '/maintenance', icon: '🛠️', label: 'Predictive Maintenance' },
+  { path: '/scenarios', icon: '🔬', label: 'Scenario Lab' },
+  { path: '/history', icon: '📈', label: 'Optimization History' },
+  { path: '/configuration', icon: '⚙️', label: 'Microgrid Config' },
 ];
 
 export default function Sidebar({ user, onLogout }) {
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
-        <div className="logo-icon">⚡</div>
+      <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
+        <img src="/logo.jpg" alt="UrjaSetu Logo" style={{ width: 42, height: 42, borderRadius: 10, objectFit: 'cover', boxShadow: '0 0 12px rgba(16,185,129,0.3)' }} />
         <div>
-          <h1>UrjaSetu</h1>
-          <span>Energy Bridge</span>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>UrjaSetu</h1>
+          <span style={{ fontSize: 10, color: 'var(--text-secondary)', display: 'block', lineHeight: 1.2, marginTop: 2 }}>
+            Connecting renewable generation with demand
+          </span>
         </div>
       </div>
 
