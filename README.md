@@ -29,7 +29,7 @@ Highlights
 🖼️ Prototype
 <div align="center"> <img src="docs/images/dashboard-preview.svg" alt="UrjaSetu dashboard prototype — dark glassmorphism UI showing KPI cards, energy mix donut chart, battery gauge, hourly dispatch bars, and an AI explainability panel" width="100%">
 
-Live operator dashboard — KPIs, energy mix, battery gauge, hourly dispatch, and AI-generated explanations, all on one screen.
+Live operator dashboard — KPIs, energy mix, battery gauge, hourly dispatch, and AI-generated explanations, all on one screen..
 
 </div>
 
