@@ -7,7 +7,6 @@ const navItems = [
   { path: '/maintenance', icon: '🛠️', label: 'Predictive Maintenance' },
   { path: '/scenarios', icon: '🔬', label: 'Scenario Lab' },
   { path: '/history', icon: '📈', label: 'Optimization History' },
-  { path: '/configuration', icon: '⚙️', label: 'Microgrid Config' },
 ];
 
 export default function Sidebar({ user, onLogout }) {

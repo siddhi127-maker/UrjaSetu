@@ -75,10 +75,21 @@ class DemandForecast:
         results = []
         for h in range(hours):
             ts = start_time + timedelta(hours=h)
+            d_ly = self._get_last_year_demand(db, ts)
+            d_7d = self._get_7day_average(db, ts)
             demand = self.predict_demand(db, ts)
+
+            # Fallback values if None
+            hour = ts.hour
+            base_default = float(DEFAULT_HOURLY_PROFILE.get(hour, 50))
+            ly_val = round(d_ly, 2) if d_ly is not None else round(base_default * 0.95, 2)
+            d7_val = round(d_7d, 2) if d_7d is not None else round(base_default * 1.05, 2)
+
             results.append({
                 "timestamp": ts.isoformat(),
                 "demand_kwh": demand,
+                "demand_ly": ly_val,
+                "demand_7d": d7_val,
             })
         return results
 

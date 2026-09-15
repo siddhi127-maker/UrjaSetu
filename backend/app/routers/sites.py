@@ -11,6 +11,19 @@ from app.models.schemas import SiteProfile
 router = APIRouter(prefix="/api/sites", tags=["Sites"])
 
 SITE_PRESETS: Dict[str, SiteProfile] = {
+    "rampur_village": SiteProfile(
+        id="rampur_village",
+        name="Rampur Rural Microgrid",
+        location="Uttar Pradesh (Lat: 28.80°N, Lon: 79.02°E)",
+        description="Core agricultural village microgrid with solar PV, wind, battery storage, and backup diesel genset.",
+        solar_capacity_kw=160.0,
+        wind_capacity_kw=50.0,
+        battery_capacity_kwh=220.0,
+        diesel_capacity_kw=120.0,
+        diesel_cost_per_l=95.0,
+        critical_load_ratio=0.45,
+        icon="🏡",
+    ),
     "kalyanpura": SiteProfile(
         id="kalyanpura",
         name="Kalyanpura Village Microgrid",

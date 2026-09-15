@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import Dispatch from './pages/Dispatch';
 import Forecast from './pages/Forecast';
+import PredictiveMaintenance from './pages/PredictiveMaintenance';
 import Scenarios from './pages/Scenarios';
 import History from './pages/History';
 import Login from './pages/Login';
@@ -14,13 +15,13 @@ import { isLoggedIn, getStoredUser, isAdmin, logout } from './utils/auth';
 import { ThemeProvider } from './context/ThemeContext';
 
 const pageConfig = {
-  '/': { title: 'Dashboard', subtitle: 'Village Microgrid Overview' },
-  '/dispatch': { title: 'Live Dispatch', subtitle: 'Real-time optimization controls' },
-  '/forecast': { title: 'Energy Forecast', subtitle: 'Solar, wind & demand predictions' },
-  '/maintenance': { title: 'Predictive Maintenance', subtitle: 'AI Per-Unit Servicing & Anomaly Alerts' },
-  '/scenarios': { title: 'What-If Simulator', subtitle: 'Explore scenario impacts' },
-  '/history': { title: 'History', subtitle: 'Historical performance review' },
-  '/admin': { title: 'Admin Panel', subtitle: 'User management & access control' },
+  '/': { title: 'Dashboard', subtitle: 'Pan-India Renewable Microgrid Executive Overview' },
+  '/dispatch': { title: 'Live Dispatch', subtitle: 'Real-time MILP 24-Hour Optimization Controls' },
+  '/forecast': { title: 'Day-Ahead AI Forecast', subtitle: 'Section 6.6 Renewable Generation & Demand Forecast' },
+  '/maintenance': { title: 'Predictive Maintenance', subtitle: 'Section 6.7 Per-Unit Maintenance & Servicing Alerts' },
+  '/scenarios': { title: 'What-If Simulator', subtitle: 'Explore grid scenarios and emergency events' },
+  '/history': { title: 'History & Analytics', subtitle: 'Historical grid dispatch performance log' },
+  '/admin': { title: 'Admin Panel', subtitle: 'User management & role-based access control' },
 };
 
 function ProtectedRoute({ children }) {
@@ -54,8 +55,7 @@ function AppLayout({ user, onLogout }) {
             <Route path="/" element={<Dashboard />} />
             <Route path="/dispatch" element={<Dispatch />} />
             <Route path="/forecast" element={<Forecast />} />
-            <Route path="/maintenance" element={<Forecast />} />
-            <Route path="/configuration" element={<Forecast />} />
+            <Route path="/maintenance" element={<PredictiveMaintenance />} />
             <Route path="/scenarios" element={<Scenarios />} />
             <Route path="/history" element={<History />} />
             <Route

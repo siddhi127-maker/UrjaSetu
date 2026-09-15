@@ -35,6 +35,7 @@ async def get_forecast(hours: int = Query(default=24, ge=1, le=168), db: Session
         "solar_forecast": solar_results,
         "wind_forecast": wind_results,
         "demand_forecast": demand_results,
+        "weather_inputs": [w.model_dump() for w in weather_data],
         "forecast_method": "formula",
         "hours": hours,
     }
